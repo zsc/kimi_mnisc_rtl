@@ -273,6 +273,23 @@ module weight_buffer #(
     // 组合逻辑：根据状态读取 RAM 并重组为 wgt2 格式
     // 在 READ_ACTIVE 或 READ_DONE 状态下保持输出稳定
     always_comb begin
+        // 初始化局部变量
+        logic [2:0]  wgt_slices_local;
+        logic [7:0]  OC_CH_PER_CYCLE_local;
+        logic [15:0] phys_oc, phys_ic;
+        logic [ADDR_W-1:0] addr;
+        logic [MAX_WGT_BITS-1:0] wgt_val;
+        logic [7:0] oc_lane;
+        
+        // 默认值
+        wgt_slices_local = reg_wgt_bits[4:1];
+        OC_CH_PER_CYCLE_local = OC2_LANES / wgt_slices_local;
+        phys_oc = '0;
+        phys_ic = '0;
+        addr = '0;
+        wgt_val = '0;
+        oc_lane = '0;
+        
         // 默认清零
         for (int oc = 0; oc < OC2_LANES; oc++) begin
             for (int kh_i = 0; kh_i < KH; kh_i++) begin
@@ -286,15 +303,6 @@ module weight_buffer #(
         
         // 只在 READ_ACTIVE 或 READ_DONE 状态计算输出
         if (read_state_reg == READ_ACTIVE || read_state_reg == READ_DONE) begin
-            logic [2:0]  wgt_slices_local;
-            logic [7:0]  OC_CH_PER_CYCLE_local;
-            logic [15:0] phys_oc, phys_ic;
-            logic [ADDR_W-1:0] addr;
-            logic [MAX_WGT_BITS-1:0] wgt_val;
-            logic [7:0] oc_lane;
-            
-            wgt_slices_local = reg_wgt_bits[4:1];
-            OC_CH_PER_CYCLE_local = OC2_LANES / wgt_slices_local;
             
             // 遍历所有 slice group
             for (int g = 0; g < 8; g++) begin

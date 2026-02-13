@@ -456,9 +456,10 @@ module feature_line_buffer #(
     
     integer kh_i, kw_i;
     always_comb begin
+        logic [31:0] full_addr;
+        full_addr = '0;
         for (kh_i = 0; kh_i < 3; kh_i++) begin
             for (kw_i = 0; kw_i < 3; kw_i++) begin
-                logic [31:0] full_addr;
                 full_addr = ((win_y_pos[kh_i] * r_W + win_x_pos[kw_i]) * r_IC);
                 addr_base[kh_i][kw_i] = full_addr[ELEM_CNT_W-1:0];
             end
@@ -497,6 +498,10 @@ module feature_line_buffer #(
     //========================================================================
     
     always_comb begin
+        // Local variable declaration and initialization
+        int lane_idx;
+        lane_idx = 0;
+        
         // Default assignment
         for (int y = 0; y < 3; y++) begin
             for (int x = 0; x < 3; x++) begin
@@ -513,7 +518,7 @@ module feature_line_buffer #(
                     if (slice < r_act_slices) begin
                         for (int ch = 0; ch < 16; ch++) begin
                             if (ch < r_IC_CH_PER_CYCLE) begin
-                                int lane_idx = slice * r_IC_CH_PER_CYCLE + ch;
+                                lane_idx = slice * r_IC_CH_PER_CYCLE + ch;
                                 if (lane_idx < IC2_LANES) begin
                                     win_act2[y][x][lane_idx] = raw_win[y][x][ch][2*slice +: 2];
                                 end

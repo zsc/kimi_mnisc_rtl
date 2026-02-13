@@ -125,6 +125,7 @@ module conv_core_lowbit #(
     logic signed [ACC_W-1:0] sum_s [0:OC2_LANES-1][0:MAX_ACT_SLICES-1];
     
     always_comb begin
+        // 初始化 - 所有元素清零
         for (int oc_idx = 0; oc_idx < OC2_LANES; oc_idx++) begin
             for (int s = 0; s < MAX_ACT_SLICES; s++) begin
                 sum_u[oc_idx][s] = '0;
@@ -134,12 +135,15 @@ module conv_core_lowbit #(
         
         // 对每个 oc_lane
         for (int oc_idx = 0; oc_idx < OC2_LANES; oc_idx++) begin
+            // 局部变量声明并初始化
+            logic [15:0] temp_sum;
+            int pair_start;
+            temp_sum = '0;
+            pair_start = 0;
             
             // 情况1: act_bits == 2 (单个 slice)
             if (act_slices == 1) begin
                 // 累加所有 pairs
-                logic [15:0] temp_sum;
-                temp_sum = '0;
                 for (int kh_idx = 0; kh_idx < KH; kh_idx++) begin
                     for (int kw_idx = 0; kw_idx < KW; kw_idx++) begin
                         for (int p = 0; p < ic_lanes_per_slice/2; p++) begin
@@ -154,10 +158,8 @@ module conv_core_lowbit #(
             // 情况2: act_bits > 2 (多个 slices)
             else begin
                 for (int s = 0; s < act_slices; s++) begin
-                    logic [15:0] temp_sum;
-                    int pair_start;
-                    
                     temp_sum = '0;
+                    pair_start = 0;
                     
                     // 该 slice 对应的 ic lane 范围: [s*ic_lanes_per_slice, (s+1)*ic_lanes_per_slice-1]
                     // 转换为 pair 索引: pair = lane/2
@@ -208,6 +210,12 @@ module conv_core_lowbit #(
     logic signed [ACC_W-1:0] final_result [0:OC2_LANES-1];
     
     always_comb begin
+        // 声明并初始化局部变量
+        logic signed [ACC_W-1:0] temp;
+        int oc_lane;
+        temp = '0;
+        oc_lane = 0;
+        
         for (int i = 0; i < OC2_LANES; i++) begin
             final_result[i] = '0;
         end
@@ -221,17 +229,14 @@ module conv_core_lowbit #(
             // wgt_bits > 2, 需要合并 slices
             // 对每个物理输出通道 p
             for (int p = 0; p < oc_lanes_per_slice; p++) begin
-                logic signed [ACC_W-1:0] temp;
                 temp = '0;
                 
                 for (int g = 0; g < wgt_slices; g++) begin
-                    int oc_lane;
                     oc_lane = g * oc_lanes_per_slice + p;
                     temp = temp + (result_after_act_merge[oc_lane] <<< (2*g));
                 end
                 
                 // 输出到第一个 slice 对应的 oc_lane
-                // (或者可以输出到所有相关 lane，但通常只需要每物理通道一个结果)
                 final_result[p] = temp;
             end
         end
