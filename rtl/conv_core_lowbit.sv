@@ -103,8 +103,8 @@ module conv_core_lowbit #(
                         end
                         
                         muladd2_lut u_muladd2_lut (
-                            .in(lut_in),
-                            .out(lut_out_wire)
+                            .in_data(lut_in),
+                            .out_data(lut_out_wire)
                         );
                         
                         assign lut_out[oc][kh][kw][pair] = lut_out_wire;

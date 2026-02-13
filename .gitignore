@@ -1,0 +1,76 @@
+# Verilog/VPP simulation outputs
+*.vvp
+*.vcd
+
+# Verilator
+obj_dir/
+*.d
+*.o
+*.a
+
+# Vivado/Vitis
+*.cache/
+*.hw/
+*.ip_user_files/
+*.sim/
+*.runs/
+*.gen/
+*.hbs/
+*.hbs_tmp/
+*.log
+*.jou
+*.str
+*.wdb
+xsim.dir/
+xvlog.pb
+xelab.pb
+xsim.pb
+
+# Quartus/ModelSim
+db/
+incremental_db/
+output_files/
+simulation/
+*.qws
+*.qpf
+*.qsf
+*.sof
+*.pof
+*.sld
+*.cdf
+work/
+_modelsim/
+vsim.wlf
+transcript
+
+# Icarus Verilog
+*.vcd
+*.lxt
+*.vvp
+
+# General build artifacts
+build/
+dist/
+*.exe
+*.out
+*.elf
+
+# Editor/IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Python (if any scripts)
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+
+# Documentation build
+docs/_build/
+*.pdf
